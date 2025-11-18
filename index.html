@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Red Brick Building AR (Debug)</title>
+
+    <!-- 載入 model-viewer -->
+    <script type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+      }
+      model-viewer {
+        width: 100vw;
+        height: 100vh;
+        background-color: #eee;
+      }
+      :not(:defined) > * {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <model-viewer
+      src="red_brick_building.glb"
+      ios-src="Red_Brick_Building.usdz"
+      alt="Red brick building"
+      camera-controls
+      auto-rotate
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      shadow-intensity="1"
+      environment-image="neutral">
+    </model-viewer>
+  </body>
+</html>
+
