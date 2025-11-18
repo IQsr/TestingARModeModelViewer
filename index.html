@@ -103,6 +103,44 @@
         display: block;
       }
 
+      #ios-ar-fallback {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 16px;
+        z-index: 11;
+      }
+
+      #ios-ar-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: #fff;
+        color: #1a73e8;
+        text-decoration: none;
+        font-size: 14px;
+        border: 1px solid #d1d1d1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+      }
+
+      #asset-warning {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff7e6;
+        color: #8a5200;
+        border: 1px solid #f0ad4e;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        display: none;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+        z-index: 12;
+      }
+
     </style>
   </head>
 
@@ -135,5 +173,63 @@
       </div>
 
     </model-viewer>
+
+    <!-- iOS fallback：如果 model-viewer 按鈕出唔嚟，呢粒會永遠顯示 -->
+    <div id="ios-ar-fallback">
+      <a
+        id="ios-ar-link"
+        rel="ar"
+        type="model/vnd.usdz+zip"
+        href="Red_Brick_Building.usdz"
+        aria-label="Open USDZ in AR">
+        <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20" alt="">
+        Open in AR (Quick Look)
+      </a>
+    </div>
+
+    <div id="asset-warning" role="status" aria-live="polite"></div>
+
+    <script>
+      // Fallback for GitHub Pages / caching proxies that might hide the AR button
+      // Visible by default, hidden only on non-iOS so it still shows if JS fails to run
+      const isIOS = (/iPad|iPhone|iPod/i.test(navigator.userAgent)) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const fallback = document.getElementById('ios-ar-fallback');
+
+      if (!isIOS) {
+        fallback.style.display = 'none';
+      }
+
+      // Surface asset reachability problems early (e.g., 404 on GitHub Pages)
+      const warning = document.getElementById('asset-warning');
+
+      function showWarning(message) {
+        warning.textContent = message;
+        warning.style.display = 'block';
+      }
+
+      async function checkAsset(url, label) {
+        async function probe(request) {
+          const response = await fetch(url, request);
+          if (!response.ok) {
+            throw new Error(`status ${response.status}`);
+          }
+        }
+
+        try {
+          await probe({ method: 'HEAD' });
+        } catch (headError) {
+          // Some hosts may not allow HEAD; try a tiny GET range request before warning
+          try {
+            await probe({ method: 'GET', headers: { Range: 'bytes=0-0' } });
+          } catch (getError) {
+            showWarning(`${label} unreachable (${headError.message || headError})`);
+          }
+        }
+      }
+
+      checkAsset('Red_Brick_Building.usdz', 'USDZ (iOS AR)');
+      checkAsset('red_brick_building.glb', 'GLB model');
+    </script>
   </body>
 </html>
