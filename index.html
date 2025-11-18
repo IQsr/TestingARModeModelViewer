@@ -135,5 +135,27 @@
       </div>
 
     </model-viewer>
+
+    <!-- iOS fallback：如果 model-viewer 按鈕出唔嚟，呢粒會永遠顯示 -->
+    <div id="ios-ar-fallback" hidden>
+      <a
+        id="ios-ar-link"
+        rel="ar"
+        type="model/vnd.usdz+zip"
+        href="Red_Brick_Building.usdz"
+        aria-label="Open USDZ in AR">
+        Open in AR (Quick Look)
+      </a>
+    </div>
+
+    <script>
+      // Fallback for GitHub Pages / caching proxies that might hide the AR button
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const fallback = document.getElementById('ios-ar-fallback');
+
+      if (isIOS) {
+        fallback.hidden = false;
+      }
+    </script>
   </body>
 </html>

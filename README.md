@@ -18,6 +18,11 @@ python3 server.py
 2. If using another device: expose the server via a tunnel (e.g., `ngrok http 8000`) to get an `https` URL.
 3. Tap the "View in your space" button; Quick Look should launch the `.usdz` asset.
 
+## GitHub Pages notes (AR button missing?)
+- GitHub Pages serves over **HTTPS**, which is required for iOS AR.
+- Some caches/CDNs occasionally hide the default `model-viewer` AR button. An iOS-only fallback link is now included at the bottom of the page; it uses `rel="ar"` and explicitly declares the USDZ MIME type (`model/vnd.usdz+zip`).
+- If you host elsewhere and control headers, set `Content-Type: model/vnd.usdz+zip` for `.usdz` so Quick Look opens reliably.
+
 ## Files
 - `index.html` — `model-viewer` example wired for AR (Quick Look on iOS, Scene Viewer/WebXR on Android/desktop).
 - `red_brick_building.glb` — GLB asset for `model-viewer`.
