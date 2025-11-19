@@ -10,16 +10,66 @@
     </script>
 
     <style>
+      :root {
+        color-scheme: dark;
+      }
+
       body {
         margin: 0;
-        background: #000;
+        background: radial-gradient(circle at 20% 20%, #233040, #0f1621 60%);
+        color: #e9f1ff;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        height: 100vh;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        padding: 48px 40px;
+        background: linear-gradient(160deg, rgba(24, 33, 46, 0.95), rgba(12, 18, 28, 0.95));
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .sidebar h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0.3px;
+      }
+
+      .sidebar p {
+        margin: 0;
+        line-height: 1.6;
+        color: #cdd8ea;
+      }
+
+      .sidebar .accent {
+        display: inline-block;
+        padding: 6px 12px;
+        background: rgba(90, 173, 255, 0.15);
+        border: 1px solid rgba(90, 173, 255, 0.35);
+        border-radius: 999px;
+        font-size: 13px;
+        color: #aad4ff;
+        width: fit-content;
+      }
+
+      .viewer-wrapper {
+        position: relative;
+        overflow: hidden;
       }
 
       model-viewer {
-        width: 100vw;
+        width: 100%;
         height: 100vh;
-        background-color: #f0f0f0;
+        background-color: #0f1621;
       }
 
       /* ⚠️ Debug：暫時關掉呢句，避免 children 被隱藏
@@ -107,34 +157,47 @@
   </head>
 
   <body>
-    <model-viewer
-      src="red_brick_building.glb"
-      ios-src="Red_Brick_Building.usdz"
-      alt="Red Brick Building"
-      camera-controls
-      auto-rotate
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      environment-image="neutral"
-      shadow-intensity="1">
+    <div class="layout">
+      <aside class="sidebar">
+        <span class="accent">Experiment brief</span>
+        <h1>How the Experiment Works</h1>
+        <p>We place a cup of hot water inside a small “building” model.</p>
+        <p>A lid covers the cup, and a larger outer box provides different insulation materials.</p>
+        <p>We record how quickly the hot water cools down over time.</p>
+        <p>Then we repeat the test with different insulation to see which one keeps the “building” warm the longest.</p>
+      </aside>
 
-      <!-- 自訂 AR Button：就算冇 AR 支援，都應該見到呢粒掣 -->
-      <button slot="ar-button" id="ar-button">
-        <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20" alt="">
-        View in your space
-      </button>
+      <div class="viewer-wrapper">
+        <model-viewer
+          src="red_brick_building.glb"
+          ios-src="Red_Brick_Building.usdz"
+          alt="Red Brick Building"
+          camera-controls
+          auto-rotate
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          environment-image="neutral"
+          shadow-intensity="1">
 
-      <!-- AR 手勢提示（你暫時可以用任何 hand.png，或者先刪走呢段） -->
-      <div id="ar-prompt">
-        <img src="hand.png" alt="Move phone to detect surface">
+          <!-- 自訂 AR Button：就算冇 AR 支援，都應該見到呢粒掣 -->
+          <button slot="ar-button" id="ar-button">
+            <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20" alt="">
+            View in your space
+          </button>
+
+          <!-- AR 手勢提示（你暫時可以用任何 hand.png，或者先刪走呢段） -->
+          <div id="ar-prompt">
+            <img src="hand.png" alt="Move phone to detect surface">
+          </div>
+
+          <!-- AR Tracking 失敗提示 -->
+          <div id="ar-failure">
+            Tracking lost — move your phone slowly
+          </div>
+
+        </model-viewer>
       </div>
-
-      <!-- AR Tracking 失敗提示 -->
-      <div id="ar-failure">
-        Tracking lost — move your phone slowly
-      </div>
-
-    </model-viewer>
+    </div>
 
     <!-- iOS fallback：如果 model-viewer 按鈕出唔嚟，呢粒會永遠顯示 -->
     <div id="ios-ar-fallback" hidden>
