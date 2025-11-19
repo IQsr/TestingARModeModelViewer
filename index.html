@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Red Brick Building • AR Preview</title>
 
-    <!-- 一定要有，唔好改 URL -->
     <script type="module"
       src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
     </script>
@@ -14,9 +13,7 @@
         color-scheme: light;
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
@@ -76,20 +73,12 @@
       }
 
       @media (max-width: 900px) {
-        .page {
-          grid-template-columns: 1fr;
-        }
-
-        .panel {
-          padding: 28px 20px;
-        }
-
-        model-viewer {
-          height: 70vh;
-        }
+        .page { grid-template-columns: 1fr; }
+        .panel { padding: 28px 20px; }
+        model-viewer { height: 70vh; }
       }
 
-      /* Custom AR button */
+      /* AR button */
       #ar-button {
         background-color: white;
         position: absolute;
@@ -111,15 +100,9 @@
         z-index: 10;
       }
 
-      #ar-button img {
-        pointer-events: none;
-      }
+      #ar-button:active { background-color: #e9e9e9; }
 
-      #ar-button:active {
-        background-color: #e9e9e9;
-      }
-
-      /* AR 提示 */
+      /* AR prompt */
       @keyframes float {
         0% { transform: translateX(-50%) translateY(0px); }
         100% { transform: translateX(-50%) translateY(-20px); }
@@ -202,9 +185,31 @@
         z-index: 12;
       }
 
+      /* ⭐ Model Switch Buttons */
+      #model-switcher {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 20;
+      }
+
+      #model-switcher button {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+      }
+
+      #model-switcher button:active {
+        background: #e0e0e0;
+      }
+
     </style>
   </head>
-
 
   <body>
     <div class="page">
@@ -221,7 +226,10 @@
       </aside>
 
       <div class="model-area">
+
+        <!-- ⭐ MODEL VIEWER -->
         <model-viewer
+          id="viewer"
           src="red_brick_building.glb"
           ios-src="Red_Brick_Building.usdz"
           alt="Red Brick Building"
@@ -232,82 +240,79 @@
           environment-image="neutral"
           shadow-intensity="1">
 
-          <!-- 自訂 AR Button：就算冇 AR 支援，都應該見到呢粒掣 -->
           <button slot="ar-button" id="ar-button">
             <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20" alt="">
             View in your space
           </button>
 
-          <!-- AR 手勢提示（你暫時可以用任何 hand.png，或者先刪走呢段） -->
           <div id="ar-prompt">
             <img src="hand.png" alt="Move phone to detect surface">
           </div>
 
-          <!-- AR Tracking 失敗提示 -->
           <div id="ar-failure">
             Tracking lost — move your phone slowly
           </div>
 
         </model-viewer>
+
+        <!-- ⭐ MODEL SWITCHER BUTTONS -->
+        <div id="model-switcher">
+          <button onclick="prevModel()">◀ Previous</button>
+          <button onclick="nextModel()">Next ▶</button>
+        </div>
+
       </div>
     </div>
 
-    <!-- iOS fallback：如果 model-viewer 按鈕出唔嚟，呢粒會永遠顯示 -->
     <div id="ios-ar-fallback">
-      <a
-        id="ios-ar-link"
-        rel="ar"
-        type="model/vnd.usdz+zip"
-        href="Red_Brick_Building.usdz"
-        aria-label="Open USDZ in AR">
-        <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20" alt="">
+      <a id="ios-ar-link" rel="ar" type="model/vnd.usdz+zip"
+         href="Red_Brick_Building.usdz">
+        <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/view_in_ar/v6/24px.svg" height="20">
         Open in AR (Quick Look)
       </a>
     </div>
 
-    <div id="asset-warning" role="status" aria-live="polite"></div>
+    <div id="asset-warning"></div>
 
+
+    <!-- ⭐ MODEL SWITCH JAVASCRIPT -->
     <script>
-      // Fallback for GitHub Pages / caching proxies that might hide the AR button
-      // Visible by default, hidden only on non-iOS so it still shows if JS fails to run
-      const isIOS = (/iPad|iPhone|iPod/i.test(navigator.userAgent)) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const fallback = document.getElementById('ios-ar-fallback');
-
-      if (!isIOS) {
-        fallback.style.display = 'none';
-      }
-
-      // Surface asset reachability problems early (e.g., 404 on GitHub Pages)
-      const warning = document.getElementById('asset-warning');
-
-      function showWarning(message) {
-        warning.textContent = message;
-        warning.style.display = 'block';
-      }
-
-      async function checkAsset(url, label) {
-        async function probe(request) {
-          const response = await fetch(url, request);
-          if (!response.ok) {
-            throw new Error(`status ${response.status}`);
-          }
+      // You can add as many model pairs as you want.
+      const models = [
+        {
+          glb: "red_brick_building.glb",
+          usdz: "Red_Brick_Building.usdz"
+        },
+        {
+          glb: "Thermal_Insulation_Experiment_Model.glb",
+          usdz: "Thermal_Insulation_Experiment_Model.usdz"   // 如果你有對應 .usdz，可以改名
         }
+      ];
 
-        try {
-          await probe({ method: 'HEAD' });
-        } catch (headError) {
-          // Some hosts may not allow HEAD; try a tiny GET range request before warning
-          try {
-            await probe({ method: 'GET', headers: { Range: 'bytes=0-0' } });
-          } catch (getError) {
-            showWarning(`${label} unreachable (${headError.message || headError})`);
-          }
+      let index = 0;
+      const viewer = document.getElementById("viewer");
+
+      function updateModel() {
+        viewer.setAttribute("src", models[index].glb);
+
+        if (models[index].usdz) {
+          viewer.setAttribute("ios-src", models[index].usdz);
+          document.getElementById("ios-ar-link").href = models[index].usdz;
+        } else {
+          viewer.removeAttribute("ios-src");
         }
       }
 
-      checkAsset('Red_Brick_Building.usdz', 'USDZ (iOS AR)');
-      checkAsset('red_brick_building.glb', 'GLB model');
+      function nextModel() {
+        index = (index + 1) % models.length;
+        updateModel();
+      }
+
+      function prevModel() {
+        index = (index - 1 + models.length) % models.length;
+        updateModel();
+      }
     </script>
+
   </body>
 </html>
